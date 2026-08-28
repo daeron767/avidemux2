@@ -1,0 +1,9 @@
+bin/avidemux3_qt6
+bin/avidemux3_jobs_qt6
+include/avidemux/2.8/qt6/config.h
+lib/libADM_openGLQT66.so
+lib/libADM_render6_QT6.so
+lib/libADM_UIQT66.so
+share/applications/org.avidemux.Avidemux.desktop
+share/icons/hicolor/128x128/apps/org.avidemux.Avidemux.png
+share/metainfo/org.avidemux.Avidemux.appdata.xml
