@@ -1,342 +1,139 @@
-PORTNAME=		avidemux2
-DISTVERSION=		2.8.2.g20260825
-AVIDEMUX_VERSION=	${DISTVERSION}
-CATEGORIES=		multimedia
+PORTNAME?=	avidemux2
+DISTVERSION=	2.8.2.g20260825
+CATEGORIES=	multimedia
+MASTER_SITES=	https://github.com/daeron767/avidemux2/releases/download/v2.8.2/:ffmpeg
+DISTFILES=	${GH_PROJECT}-${DISTVERSION}-${GH_TAGNAME}_GH0.tar.gz \
+		ffmpeg-7.0.2.tar.bz2:ffmpeg
 
-USE_GITHUB=		yes
-GH_ACCOUNT=		mean00
-GH_PROJECT=		avidemux2
-GH_TAGNAME=		13b4a26
+MAINTAINER=	multimedia@FreeBSD.org
+WWW=		https://avidemux.org/
+LICENSE=	GPLv2
 
-LICENSE=		GPLv2
+NOT_FOR_ARCHS=	powerpc powerpc64 powerpcspe
+NOT_FOR_ARCHS_REASON=	CPU architecture not supported by upstream CMake script
 
-BUILD_DEPENDS+=	${BUILD_DEPENDS_${ARCH}}
-BUILD_DEPENDS_amd64=	yasm:devel/yasm
-BUILD_DEPENDS_i386=	yasm:devel/yasm
-BUILD_DEPENDS+=	bash:shells/bash
-
+BUILD_DEPENDS+=	bash:shells/bash \
+		yasm:devel/yasm
 LIB_DEPENDS+=	libmad.so:audio/libmad \
-		 libpng.so:graphics/png
+		libpng.so:graphics/png \
+		libdrm.so:graphics/libdrm
 
+USE_GITHUB=	nodefault
+GH_ACCOUNT=	mean00
+GH_PROJECT=	avidemux2
+GH_TAGNAME=	13b4a26
+WRKSRC=		${WRKDIR}/${PORTNAME}-${GH_TAGNAME}
+
+USES+=		cmake compiler:c++17-lang localbase pkgconfig
 USE_GNOME=	libxml2
+USE_XORG+=	x11
 
-OPTIONS_FILE=	${PORT_DBDIR}/${OPTIONS_NAME:C/-.*//}/options
-
-USES=		cmake:noninja pkgconfig iconv gmake compiler:c++17-lang sqlite \
-		 dos2unix gnome
-
-# DOS2UNIX_FILES=	cmake/admCheckMiscLibs.cmake \
-#         avidemux_core/ADM_coreVideoCodec/include/ADM_coreVideoCodec6_export.h \
-#         avidemux_core/ADM_coreVideoCodec/include/ADM_ffmp43.h
-
+CPPFLAGS+=	-I${LOCALBASE}/include
+CXXFLAGS+=	-I${LOCALBASE}/include
+LDFLAGS+=	-L${LOCALBASE}/lib -lexecinfo
 CMAKE_ARGS+=	-DGNUMAKE_EXECUTABLE=gmake \
 		-DAVIDEMUX_PACKAGER=none \
 		-DGTK:BOOL=OFF \
-		-DESD:BOOL=OFF
+		-DESD:BOOL=OFF \
+		-DARTS:BOOL=OFF \
+		-DALSA:BOOL=OFF \
+		-DAFTEN:BOOL=OFF \
+		-DCMAKE_DL_LIBS="" \
+		-DLIBEXECINFO_INCLUDE_DIR=/usr/include \
+		-DLIBEXECINFO_LIBRARY_DIR=/usr/lib \
+		-DCMAKE_EXE_LINKER_FLAGS="${LDFLAGS}" \
+		-DCMAKE_SHARED_LINKER_FLAGS="${LDFLAGS}" \
+		-DCMAKE_PREFIX_PATH:PATH=${LOCALBASE}
 
-CXXFLAGS+=	-I${LOCALBASE}/include
 MAKE_JOBS_UNSAFE=	yes
-NOPRECIOUSMAKEVARS=	yes
 
-CONFIGURE_ENV+=	COMPILER_PATH=${LOCALBASE}/bin
-MAKE_ENV+=	COMPILER_PATH=${LOCALBASE}/bin
-
-OPTIONS_DEFINE=	CLI FREETYPE FONTCONFIG OSS JACK PULSEAUDIO \
-		XVIDEO FAAC FRIBIDI OPUS TWOLAME \
-		FAAD X264 X265 VPX AOM XVID AMR VORBIS NLS LAME \
-		VAAPI VDPAU DCA FDK TINYPY VAPOURSYNTH NVENC
-
-OPTIONS_DEFAULT=	FREETYPE FONTCONFIG OSS XVIDEO \
-		FAAD FAAC LAME OPUS TWOLAME VORBIS \
-		VPX AOM XVID X264 X265 \
-		DCA FDK TINYPY VAPOURSYNTH \
-		VDPAU NLS
-
+OPTIONS_DEFINE+=	AMR AOM ASS DCA FAAC FAAD FDK FONTCONFIG FREETYPE \
+		JACK LAME NLS NVENC OPUS OSS PULSEAUDIO TINYPY TWOLAME VAAPI \
+		VAPOURSYNTH VDPAU VORBIS VPX X264 X265 XVID
+OPTIONS_DEFAULT=AMR AOM ASS DCA FAAC FAAD FDK FONTCONFIG FREETYPE LAME \
+		NLS OPUS OSS TINYPY TWOLAME VORBIS VPX X264 X265 XVID
+OPTIONS_EXCLUDE=VAPOURSYNTH
 OPTIONS_SUB=	yes
 
-AOM_DESC=		AOM AV1 decoder support
-CLI_DESC=		Build CLI tool
-FDK_DESC=		FDK AAC codec support
-NVENC_DESC=		NVIDIA NVENC/NVDEC support
-TINYPY_DESC=		Python scripting via TinyPy
+AMR_DESC=	Opencore AMR codec support
+AOM_DESC=	AOM AV1 decoder support
+ASS_DESC=	SubStation Alpha (SSA/ASS) subtitle support
+DCA_DESC=	DTS Coherent Acoustics decoding support
+FAAC_DESC=	FAAC AAC audio encoding support
+FAAD_DESC=	FAAD AAC audio decoding support
+FDK_DESC=	Fraunhofer FDK AAC codec support
+FONTCONFIG_DESC=	Fontconfig library support
+FREETYPE_DESC=	FreeType font rendering support
+JACK_DESC=	JACK audio server support
+LAME_DESC=	LAME MP3 audio encoding support
+NVENC_DESC=	NVIDIA NVENC/NVDEC support
+OPUS_DESC=	Opus audio codec support
+OSS_DESC=	Open Sound System audio support
+PULSEAUDIO_DESC=	PulseAudio sound server support
+TINYPY_DESC=	TinyPy Python scripting
+TWOLAME_DESC=	TwoLAME MP2 audio encoding support
+VAAPI_DESC=	VAAPI video acceleration support
 VAPOURSYNTH_DESC=	VapourSynth support
+VDPAU_DESC=		VDPAU video acceleration support
+VORBIS_DESC=		Ogg Vorbis audio codec support
+VPX_DESC=		VP8/VP9 video codec support
+X264_DESC=		H.264 video encoding support via x264
+X265_DESC=		HEVC video encoding support via x265
+XVID_DESC=		MPEG-4 ASP video encoding support via Xvid
 
+# Option Helpers
+AMR_LIB_DEPENDS=	libopencore-amrnb.so:audio/opencore-amr \
+			libopencore-amrwb.so:audio/opencore-amr
+AMR_CMAKE_BOOL=		OPENCORE_AMR
+AOM_LIB_DEPENDS=	libaom.so:multimedia/aom
+AOM_CMAKE_OFF=		-DAOMDEC:BOOL=OFF
+ASS_LIB_DEPENDS=	libass.so:multimedia/libass \
+			libfribidi.so:converters/fribidi
+ASS_CMAKE_BOOL=		LIBASS FRIBIDI
+DCA_LIB_DEPENDS=	libdca.so:multimedia/libdca
+DCA_CMAKE_OFF=		-DLIBDCA:BOOL=OFF
+FAAC_LIB_DEPENDS=	libfaac.so:audio/faac
+FAAC_CMAKE_BOOL=	FAAC
+FAAD_LIB_DEPENDS=	libfaad.so:audio/faad
+FAAD_CMAKE_BOOL=	FAAD NeAAC
+FDK_LIB_DEPENDS=	libfdk-aac.so:audio/fdk-aac
+FDK_CMAKE_BOOL=		FDK_AAC
+FONTCONFIG_LIB_DEPENDS=	libfontconfig.so:x11-fonts/fontconfig
+FONTCONFIG_CMAKE_BOOL=	FONTCONFIG
+FREETYPE_LIB_DEPENDS=	libfreetype.so:print/freetype2
+FREETYPE_CMAKE_BOOL=	FREETYPE2
+JACK_LIB_DEPENDS=	libjack.so:audio/jack
+JACK_CMAKE_BOOL=	JACK
+LAME_LIB_DEPENDS=	libmp3lame.so:audio/lame
+LAME_CMAKE_BOOL=	LAME
 NLS_USES=		gettext-runtime
-NLS_CMAKE_BOOL=		GETTEXT
-FRIBIDI_CMAKE_OFF=	-DFRIBIDI:BOOL=OFF
-FRIBIDI_LIB_DEPENDS=	libfribidi.so:converters/fribidi
-OPUS_CMAKE_OFF=		-DOPUS:BOOL=OFF -DOPUS_ENCODER:BOOL=OFF
+NLS_CMAKE_BOOL=		ENABLE_I18N
+NVENC_BUILD_DEPENDS=	${LOCALBASE}/include/ffnvcodec/nvEncodeAPI.h:multimedia/ffnvcodec-headers
+NVENC_CMAKE_BOOL=	NVENC
 OPUS_LIB_DEPENDS=	libopus.so:audio/opus
-TWOLAME_CMAKE_OFF=	-DTWOLAME:BOOL=OFF
+OPUS_CMAKE_BOOL=	OPUS OPUS_ENCODER
+OSS_CMAKE_BOOL=		ADM_SOUND_OSS
+PULSEAUDIO_LIB_DEPENDS=	libpulse.so:audio/pulseaudio
+PULSEAUDIO_CMAKE_BOOL=	PULSEAUDIOSIMPLE
+TINYPY_CMAKE_BOOL=	ENABLE_TINYPY
 TWOLAME_LIB_DEPENDS=	libtwolame.so:audio/twolame
-
-.if !defined(PACKAGE_BUILDING)
-OPTIONS_DEFAULT+=	LAME FAAC AMR X264
-.endif
-
-.include <bsd.port.options.mk>
-
-# Architecture-specific bits
-.if ${ARCH} == amd64
-CFLAGS+=	-fno-omit-frame-pointer
-.endif
-
-.if ${ARCH} == i386
-EXTRA_PATCHES+=	${PATCHDIR}/extra-patch-i386-nosse
-.endif
-
-CMAKE_ARGS+=	-DLIBEXECINFO_INCLUDE_DIR=/usr/include
-CMAKE_ARGS+=	-DLIBEXECINFO_LIBRARY_DIR=-lexecinfo
-CMAKE_ARGS+=	-DARTS:BOOL=OFF -DALSA:BOOL=OFF -DAFTEN:BOOL=OFF
-
-# CLI
-.if ${PORT_OPTIONS:MCLI}
-PLIST_SUB+=	CLI=""
-.else
-PLIST_SUB+=	CLI="@comment "
-.endif
-
-# OSS
-.if ${PORT_OPTIONS:MOSS}
-CMAKE_ARGS+=	-DOSS:BOOL=ON -DOSS_SUPPORT:BOOL=ON
-.else
-CMAKE_ARGS+=	-DOSS:BOOL=OFF -DOSS_SUPPORT:BOOL=OFF
-.endif
-
-# JACK
-.if ${PORT_OPTIONS:MJACK}
-LIB_DEPENDS+=	libjack.so:audio/jack
-PLIST_SUB+=	JACK=""
-.else
-CMAKE_ARGS+=	-DJACK:BOOL=OFF
-PLIST_SUB+=	JACK="@comment "
-.endif
-
-# PULSEAUDIO
-.if ${PORT_OPTIONS:MPULSEAUDIO}
-LIB_DEPENDS+=	libpulse.so:audio/pulseaudio
-PLIST_SUB+=	PULSEAUDIO=""
-.else
-CMAKE_ARGS+=	-DPULSEAUDIOSIMPLE:BOOL=OFF
-PLIST_SUB+=	PULSEAUDIO="@comment "
-.endif
-
-# FDK
-.if ${PORT_OPTIONS:MFDK}
-LIB_DEPENDS+=	libfdk-aac.so:audio/fdk-aac
-PLIST_SUB+=	FDK=""
-.else
-CMAKE_ARGS+=	-DFDK_AAC:BOOL=OFF
-PLIST_SUB+=	FDK="@comment "
-.endif
-
-# FREETYPE
-.if ${PORT_OPTIONS:MFREETYPE}
-LIB_DEPENDS+=	libfreetype.so:print/freetype2
-.else
-CMAKE_ARGS+=	-DFREETYPE2:BOOL=OFF
-.endif
-
-# FONTCONFIG
-.if ${PORT_OPTIONS:MFONTCONFIG}
-LIB_DEPENDS+=	libfontconfig.so:x11-fonts/fontconfig
-.else
-CMAKE_ARGS+=	-DFONTCONFIG:BOOL=OFF
-.endif
-
-# XVIDEO
-.if ${PORT_OPTIONS:MXVIDEO}
-USES+=		xorg
-USE_XORG+=	xv xext
-.else
-CMAKE_ARGS+=	-DXVIDEO:BOOL=OFF
-.endif
-
-# FAAC
-.if ${PORT_OPTIONS:MFAAC}
-LIB_DEPENDS+=	libfaac.so:audio/faac
-PLIST_SUB+=	FAAC=""
-.else
-CMAKE_ARGS+=	-DFAAC:BOOL=OFF
-PLIST_SUB+=	FAAC="@comment "
-.endif
-
-# LAME
-.if ${PORT_OPTIONS:MLAME}
-LIB_DEPENDS+=	libmp3lame.so:audio/lame
-PLIST_SUB+=	LAME=""
-.else
-CMAKE_ARGS+=	-DLAME:BOOL=OFF
-PLIST_SUB+=	LAME="@comment "
-.endif
-
-# FAAD
-.if ${PORT_OPTIONS:MFAAD}
-LIB_DEPENDS+=	libfaad.so:audio/faad
-PLIST_SUB+=	FAAD=""
-.else
-CMAKE_ARGS+=	-DFAAD:BOOL=OFF -DNeAAC:BOOL=OFF
-PLIST_SUB+=	FAAD="@comment "
-.endif
-
-# X264
-.if ${PORT_OPTIONS:MX264}
-LIB_DEPENDS+=	libx264.so:multimedia/libx264
-PLIST_SUB+=	X264=""
-.else
-CMAKE_ARGS+=	-DX264:BOOL=OFF
-PLIST_SUB+=	X264="@comment "
-.endif
-
-# X265
-.if ${PORT_OPTIONS:MX265}
-LIB_DEPENDS+=	libx265.so:multimedia/x265
-PLIST_SUB+=	X265=""
-.else
-CMAKE_ARGS+=	-DX265:BOOL=OFF
-PLIST_SUB+=	X265="@comment "
-.endif
-
-# VPX
-.if ${PORT_OPTIONS:MVPX}
-LIB_DEPENDS+=	libvpx.so:multimedia/libvpx
-PLIST_SUB+=	VPX=""
-.else
-CMAKE_ARGS+=	-DVPXDEC:BOOL=OFF -DVPXENC:BOOL=OFF
-PLIST_SUB+=	VPX="@comment "
-.endif
-
-# AOM
-.if ${PORT_OPTIONS:MAOM}
-LIB_DEPENDS+=	libaom.so:multimedia/aom
-PLIST_SUB+=	AOM=""
-.else
-CMAKE_ARGS+=	-DAOMDEC:BOOL=OFF
-PLIST_SUB+=	AOM="@comment "
-.endif
-
-# XVID
-.if ${PORT_OPTIONS:MXVID}
-LIB_DEPENDS+=	libxvidcore.so:multimedia/xvid
-PLIST_SUB+=	XVID=""
-.else
-CMAKE_ARGS+=	-DXVID:BOOL=OFF
-PLIST_SUB+=	XVID="@comment "
-.endif
-
-# TINYPY
-.if ${PORT_OPTIONS:MTINYPY}
-PLIST_SUB+=	TINYPY=""
-.else
-CMAKE_ARGS+=	-DTINYPY:BOOL=OFF
-PLIST_SUB+=	TINYPY="@comment "
-.endif
-
-# DCA
-.if ${PORT_OPTIONS:MDCA}
-LIB_DEPENDS+=	libdca.so:multimedia/libdca
-PLIST_SUB+=	DCA=""
-.else
-CMAKE_ARGS+=	-DLIBDCA:BOOL=OFF
-PLIST_SUB+=	DCA="@comment "
-.endif
-
-# VAPOURSYNTH
-.if ${PORT_OPTIONS:MVAPOURSYNTH}
-LIB_DEPENDS+=	libva.so:multimedia/libva \
-        libvdpau.so:multimedia/libvdpau \
-        libvapoursynth.so:multimedia/vapoursynth
-USE_XORG+=	x11
-PLIST_SUB+=	VAPOURSYNTH=""
-.else
-CMAKE_ARGS+=	-DVAPOURSYNTH:BOOL=OFF
-PLIST_SUB+=	VAPOURSYNTH="@comment "
-.endif
-
-# VAAPI
-.if ${PORT_OPTIONS:MVAAPI}
-LIB_DEPENDS+=	libva.so:multimedia/libva
-PLIST_SUB+=	VAAPI=""
-.else
-CMAKE_ARGS+=	-DVAAPI:BOOL=OFF -DLIBVA:BOOL=OFF
-PLIST_SUB+=	VAAPI="@comment "
-.endif
-
-# VDPAU
-.if ${PORT_OPTIONS:MVDPAU}
-LIB_DEPENDS+=	libvdpau.so:multimedia/libvdpau
-PLIST_SUB+=	VDPAU=""
-.else
-CMAKE_ARGS+=	-DVDPAU:BOOL=OFF
-PLIST_SUB+=	VDPAU="@comment "
-.endif
-
-# VORBIS
-.if ${PORT_OPTIONS:MVORBIS}
-LIB_DEPENDS+=	libvorbis.so:audio/libvorbis
-PLIST_SUB+=	VORBIS=""
-.else
-CMAKE_ARGS+=	-DLIBVORBIS:BOOL=OFF -DVORBIS:BOOL=OFF
-PLIST_SUB+=	VORBIS="@comment "
-.endif
-
-# AMR
-.if ${PORT_OPTIONS:MAMR}
-LIB_DEPENDS+=	libopencore-amrnb.so:audio/opencore-amr
-PLIST_SUB+=	AMRNB=""
-PLIST_SUB+=	AMRWB=""
-.else
-CMAKE_ARGS+=	-DOPENCORE_AMRNB:BOOL=OFF
-PLIST_SUB+=	AMRNB="@comment "
-CMAKE_ARGS+=	-DOPENCORE_AMRWB:BOOL=OFF
-PLIST_SUB+=	AMRWB="@comment "
-.endif
-
-# NVENC
-.if ${PORT_OPTIONS:MNVENC}
-BROKEN=		Fails to configure or build with ffnvcodec-headers >= 13.0
-BUILD_DEPENDS+=	${LOCALBASE}/include/ffnvcodec/nvEncodeAPI.h:multimedia/ffnvcodec-headers
-PLIST_SUB+=	NVENC=""
-.else
-CMAKE_ARGS+=	-DNVENC:BOOL=OFF
-PLIST_SUB+=	NVENC="@comment "
-.endif
-
-.include <bsd.port.pre.mk>
-
-.if $(COMPILER_FEATURES:Mlibc++)
-LDFLAGS+=	-lc++
-.endif
-LDFLAGS+=	-lexecinfo
-
-USE_GCC=	yes
-
-NOT_FOR_ARCHS=		powerpc powerpc64 powerpcspe
-NOT_FOR_ARCHS_REASON=	cmake/admDetermineSystem.cmake:78: CPU not supported
-
-
-.if !defined(PKGNAMESUFFIX) || ${PKGNAMESUFFIX} == ""
-post-extract:
-	@if [ -d ${WRKDIR}/avidemux2-13b4a260691ff4f657e6f09a90be8b94387023ca ] ; then \
-		mv ${WRKDIR}/avidemux2-13b4a260691ff4f657e6f09a90be8b94387023ca ${WRKSRC} ; \
-	fi
-
-post-patch:
-	@${MKDIR} ${CONFIGURE_WRKSRC}/config
-	@${LN} -s ${LOCALBASE}/include/iconv.h ${CONFIGURE_WRKSRC}/config
-	# @${FIND} ${WRKSRC}/cmake -name '*.cmake.orig' -delete
-
-pre-configure:
-	@cp ${FILESDIR}/ffmpeg-7.0.2.tar.bz2 \
-		${WRKSRC}/avidemux_core/ffmpeg_package/ffmpeg-7.0.2.tar.bz2
-
-post-configure-common:
-	@${FIND} ${CONFIGURE_WRKSRC} -name link.txt -print0 | ${XARGS} -0 ${REINPLACE_CMD} 's|-ldl||g'
-
-.endif
-# post-extract:
-# .for p in ffmpeg_fix_build_with_binutils_2.41.patch ffmpeg_fix_build_on_armv7.patch
-#       @${CP} ${FILESDIR}/$p \
-#               ${WRKSRC}/avidemux_core/ffmpeg_package/patches/
-# .endfor
-	
+TWOLAME_CMAKE_BOOL=	TWOLAME
+VAAPI_LIB_DEPENDS=	libva.so:multimedia/libva \
+			libva-drm.so:multimedia/libva \
+			libva-x11.so:multimedia/libva
+VAAPI_CMAKE_BOOL=	ENABLE_VAAPI VAAPI LIBVA
+VAAPI_CMAKE_OFF=	-DFFMPEG_ENABLE_VAAPI:BOOL=OFF
+VAPOURSYNTH_LIB_DEPENDS=libvapoursynth.so:multimedia/vapoursynth
+VAPOURSYNTH_USE=	XORG=x11
+VDPAU_LIB_DEPENDS=	libvdpau.so:multimedia/libvdpau
+VDPAU_CMAKE_BOOL=	ENABLE_VDPAU VDPAU
+VORBIS_LIB_DEPENDS=	libvorbis.so:audio/libvorbis
+VORBIS_CMAKE_BOOL=	LIBVORBIS VORBIS
+VPX_LIB_DEPENDS=	libvpx.so:multimedia/libvpx
+VPX_CMAKE_BOOL=		VPXDEC VPXENC
+X264_LIB_DEPENDS=	libx264.so:multimedia/libx264
+X264_CMAKE_BOOL=	X264
+X265_LIB_DEPENDS=	libx265.so:multimedia/x265
+X265_CMAKE_BOOL=	X265
+XVID_LIB_DEPENDS=	libxvidcore.so:multimedia/xvid
+XVID_CMAKE_BOOL=	XVID

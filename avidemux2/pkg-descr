@@ -1,6 +1,8 @@
-A video editor that allows editing of AVI, OGM, and MPEG videos. The MPEG
-support provides the ability to convert to DVD compliat PS streams. It
-contains various filters for deinterlacing, cropping, resizing, etc. Allows
-for cutting without re-encoding. Has the ability to re-encode and re-sample.
-Utilizes ECMAScript (aka. Javascript) to provide batch scripting and
-processing support.
+A small linear video editor using a QT6 interface capable of copy (lossless)
+and encoding modes. In copy mode, it can cut and rejoin (splice) streams 
+between keyframes (I-frames) and remux the result without re-encoding. By 
+appending the same video, you can reorder or repeat keyframe segments as 
+desired while in copy mode. In encoding mode, Avidemux can apply filters 
+(resizing, cropping, masking, deinterlacing, colour manipulation, OpenGL, 
+etc.) and re-encode to a choice of codecs (H.264, H.265, AV1, VP9, etc.) 
+and containers (MP4, MKV, TS, etc.).

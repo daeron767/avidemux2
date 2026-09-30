@@ -1,24 +1,34 @@
 PORTNAME=	avidemux2
 PKGNAMESUFFIX=	-cli
-PORTVERSION=	${AVIDEMUX_VERSION}
-CATEGORIES=	multimedia
-MAINTAINER=	multimedia@test
-COMMENT=	Simple video editor – command line interface (Qt6 generation)
-WWW=		https://avidemux.org/
 
-.include "${.CURDIR}/../avidemux2/Makefile.common"
+COMMENT=	Avidemux CLI interface for frame-accurate video editing
+DESCR=		${MASTERDIR}/pkg-descr
+PKGDIR=		${.CURDIR}
+PLIST=		${.CURDIR}/pkg-plist
+MASTERDIR=	${.CURDIR}/../avidemux2
+OPTIONS_NAME=	multimedia_avidemux2
 
-# LIB_DEPENDS=	libADM6avutil.so.${DISTVERSION:C/.*\.//:S/g/./}:multimedia/avidemux2
-LIB_DEPENDS=	libADM6avutil.so.59:multimedia/avidemux2
+LIB_DEPENDS=	libADM_core6.so:multimedia/avidemux2
 
+USES=		pkgconfig
+
+CXXFLAGS+=	-I${LOCALBASE}/include/avidemux/2.8
+
+CMAKE_ARGS+=	-DADM_NO_CORE_INSTALL:BOOL=ON \
+		-DAVIDEMUX_TOP_SOURCE_DIR:PATH=${WRKSRC} \
+		-DADM_CORE_INCLUDE_DIR:PATH=${LOCALBASE}/include/avidemux/2.8 \
+		-DENABLE_CLI=ON \
+		-DUI_DEV=CLI \
+		-DAVIDEMUX_INSTALL_PREFIX:PATH=${PREFIX} \
+		-DADM_INSTALL_HEADERS=OFF
+
+.include "${MASTERDIR}/Makefile"
+
+# Working build parameters for the CLI component
 CMAKE_SOURCE_PATH=	${WRKSRC}/avidemux/cli
-CMAKE_ARGS+=	-DADM_CORE_INCLUDE_DIR=${LOCALBASE}/include/avidemux/2.8
+BUILD_WRKSRC=		${WRKDIR}/.build
+CONFIGURE_WRKSRC=	${WRKDIR}/.build
 
-# Point CMake at the core headers that live in the source tree
-CMAKE_ARGS+=	-DCMAKE_INSTALL_PREFIX=${LOCALBASE}
-CMAKE_ARGS+=	-DADM_INSTALL_DIR=${LOCALBASE}
-CMAKE_ARGS+=	-DAVIDEMUX_INCLUDE_DIR=${WRKSRC}/../avidemux2/work/avidemux2-c7fd884/avidemux_core
-# or more robustly (preferred):
-CMAKE_ARGS+=	-DCMAKE_PREFIX_PATH=${WRKSRC}/../avidemux2/work/avidemux2-c7fd884
+EXTRA_PATCHES=	${.CURDIR}/files/patch-avidemux_cli_ADM__UIs_src_CMakeLists.txt \
+		${.CURDIR}/files/patch-avidemux_cli_ADM__render__cli_CMakeLists.txt
 
-.include <bsd.port.post.mk>

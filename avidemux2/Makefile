@@ -1,16 +1,24 @@
 PORTNAME=	avidemux2
-PORTVERSION=	${AVIDEMUX_VERSION}
+DISTVERSION=	2.8.2.g20260825
 CATEGORIES=	multimedia
-MAINTAINER=	multimedia@test
-COMMENT=	Simple video editor – core libraries (Qt6 generation)
+
+MAINTAINER=	multimedia@FreeBSD.org
+COMMENT=	Frame-accurate video editor (core libraries)
 WWW=		https://avidemux.org/
 
-DISABLE_VULNERABILITIES=	yes
+USE_LDCONFIG=	yes
 
-.include "${.CURDIR}/Makefile.common"
+MASTERDIR?=	${.CURDIR}
+.include "${MASTERDIR}/Makefile.common"
 
 CMAKE_SOURCE_PATH=	${WRKSRC}/avidemux_core
 
-post-configure: post-configure-common
+pre-configure:
+	@${CP} ${_DISTDIR}/ffmpeg-7.0.2.tar.bz2 \
+		${WRKSRC}/avidemux_core/ffmpeg_package/ffmpeg-7.0.2.tar.bz2
 
-.include <bsd.port.post.mk>
+post-patch:
+	@${MKDIR} ${CONFIGURE_WRKSRC}/config
+	@${LN} -s ${LOCALBASE}/include/iconv.h ${CONFIGURE_WRKSRC}/config
+
+.include <bsd.port.mk>

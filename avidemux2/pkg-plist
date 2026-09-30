@@ -137,6 +137,14 @@ include/avidemux/2.8/ADM_coreImageLoader/ADM_imageLoader.h
 include/avidemux/2.8/ADM_coreJobs/ADM_coreJobs.h
 include/avidemux/2.8/ADM_coreJobs/ADM_coreJobs_export.h
 include/avidemux/2.8/ADM_coreJobs/sqlJobs.h
+%%VAAPI%%include/avidemux/2.8/ADM_coreLibVA/ADM_coreLibVA.h
+%%VAAPI%%include/avidemux/2.8/ADM_coreLibVA/ADM_coreLibVA_internal.h
+%%VAAPI%%include/avidemux/2.8/ADM_coreLibVAEnc/ADM_coreLibVA_av1Encoding.h
+%%VAAPI%%include/avidemux/2.8/ADM_coreLibVAEnc/ADM_coreLibVA_bitstream.h
+%%VAAPI%%include/avidemux/2.8/ADM_coreLibVAEnc/ADM_coreLibVA_buffer.h
+%%VAAPI%%include/avidemux/2.8/ADM_coreLibVAEnc/ADM_coreLibVA_encodingContext.h
+%%VAAPI%%include/avidemux/2.8/ADM_coreLibVAEnc/ADM_coreLibVA_h264Encoding.h
+%%VAAPI%%include/avidemux/2.8/ADM_coreLibVAEnc/ADM_coreLibVA_hevcEncoding.h
 include/avidemux/2.8/ADM_coreMuxer/ADM_coreMuxer6_export.h
 include/avidemux/2.8/ADM_coreMuxer/ADM_coreMuxerFfmpeg.h
 include/avidemux/2.8/ADM_coreMuxer/ADM_muxer.h
@@ -210,8 +218,8 @@ include/avidemux/2.8/ADM_coreUtils/FFcodecContext_param.h
 include/avidemux/2.8/ADM_coreUtils/fourcc.h
 include/avidemux/2.8/ADM_coreUtils/prefs.h
 include/avidemux/2.8/ADM_coreUtils/prefs2_list.h
-include/avidemux/2.8/ADM_coreVdpau/ADM_coreVdpau.h
-include/avidemux/2.8/ADM_coreVdpau/ADM_coreVdpauInternal.h
+%%VDPAU%%include/avidemux/2.8/ADM_coreVdpau/ADM_coreVdpau.h
+%%VDPAU%%include/avidemux/2.8/ADM_coreVdpau/ADM_coreVdpauInternal.h
 include/avidemux/2.8/ADM_coreVideoCodec/ADM_codec.h
 include/avidemux/2.8/ADM_coreVideoCodec/ADM_codecEmpty.h
 include/avidemux/2.8/ADM_coreVideoCodec/ADM_codecFFVP9.h
@@ -392,6 +400,8 @@ lib/libADM_coreDemuxerMpeg6.so
 lib/libADM_coreImage6.so
 lib/libADM_coreImageLoader6.so
 lib/libADM_coreJobs.so
+%%VAAPI%%lib/libADM_coreLibVA6.so
+%%VAAPI%%lib/libADM_coreLibVAEnc6.so
 lib/libADM_coreMuxer6.so
 lib/libADM_coreScript.so
 lib/libADM_coreSocket6.so
@@ -399,7 +409,7 @@ lib/libADM_coreSqlLight3.so
 lib/libADM_coreSubtitles6.so
 lib/libADM_coreUI6.so
 lib/libADM_coreUtils6.so
-lib/libADM_coreVDPAU6.so
+%%VDPAU%%lib/libADM_coreVDPAU6.so
 lib/libADM_coreVideoCodec6.so
 lib/libADM_coreVideoEncoder6.so
 lib/libADM_coreVideoFilter6.so
